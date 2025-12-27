@@ -7,65 +7,41 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
-      margin: 0;
-      padding: 20px;
-      font-family: Arial, sans-serif;
+      margin: 0; padding: 20px; font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #ff004c, #00d4ff);
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      color: white; min-height: 100vh; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
     }
     .container {
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 30px;
-      width: 90%;
-      max-width: 400px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      text-align: center;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px);
+      border-radius: 20px; padding: 30px; width: 90%; max-width: 400px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5); text-align: center;
     }
     h1 { margin: 0 0 20px; font-size: 2em; }
-    p { margin: 10px 0; }
     button {
-      background: #ff004c;
-      border: none;
-      color: white;
-      padding: 15px 30px;
-      font-size: 1.1em;
-      border-radius: 12px;
-      cursor: pointer;
-      margin: 10px 0;
-      transition: 0.3s;
+      background: #ff004c; border: none; color: white;
+      padding: 15px 30px; font-size: 1.1em; border-radius: 12px;
+      cursor: pointer; margin: 10px 0; transition: 0.3s; width: 100%;
     }
     button:hover { background: #00d4ff; }
     input {
-      width: 100%;
-      padding: 12px;
-      margin: 10px 0;
-      border: none;
-      border-radius: 10px;
-      font-size: 1em;
+      width: 100%; padding: 12px; margin: 10px 0;
+      border: none; border-radius: 10px; font-size: 1em;
+      box-sizing: border-box;
     }
     #auth-form { display: none; }
-    #result { font-size: 1.5em; font-weight: bold; margin-top: 20px; }
+    #result { font-size: 1.2em; font-weight: bold; margin-top: 20px; color: #00ffcc; }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>MarJe Mini App</h1>
-    <p>🔥 Добро пожаловать в приложение! 🔥</p>
+    <p>🔥 Личный кабинет 🔥</p>
     
     <button id="auth-btn">🔐 Авторизоваться</button>
-    <p style="font-size: 0.9em; opacity: 0.8;">
-      Вы можете получить никнейм и пароль для приложения с помощью инлайн-кнопки в боте.
-    </p>
 
     <div id="auth-form">
-      <input type="text" id="username" placeholder="Никнейм" />
+      <input type="text" id="username" placeholder="Никнейм из бота" />
       <input type="password" id="password" placeholder="Пароль" />
       <button onclick="checkAuth()">Войти</button>
     </div>
@@ -74,7 +50,8 @@
   </div>
 
   <script>
-    Telegram.WebApp.ready();
+    const tg = window.Telegram.WebApp;
+    tg.expand(); // Развернуть на весь экран
 
     document.getElementById('auth-btn').onclick = () => {
       document.getElementById('auth-form').style.display = 'block';
@@ -82,20 +59,40 @@
     };
 
     async function checkAuth() {
-      const username = document.getElementById('username').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const result = document.getElementById('result');
+      const login = document.getElementById('username').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      const resultDiv = document.getElementById('result');
 
-      if (!username || !password) {
-        result.innerHTML = "Заполните оба поля!";
+      if (!login || !pass) {
+        resultDiv.style.color = "#ff4c4c";
+        resultDiv.innerHTML = "Введите данные!";
         return;
       }
 
-      // Отправляем данные боту для проверки
-      Telegram.WebApp.sendData(JSON.stringify({ action: 'check_auth', username, password }));
+      resultDiv.style.color = "white";
+      resultDiv.innerHTML = "Проверка...";
 
-      // Для примера (бот ответит)
-      result.innerHTML = "Проверка...";
+      try {
+        // ВАЖНО: Замени 'ТВОЙ_АЙПИ' на IP твоего сервера, где запущен бот
+        const response = await fetch('http://ТВОЙ_АЙПИ:8080/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ login: login, password: pass })
+        });
+
+        const data = await response.json();
+
+        if (data.status === 'ok') {
+          document.getElementById('auth-form').innerHTML = "";
+          resultDiv.innerHTML = `✅ Успешно!<br><br>Ваши атаки: ${data.requests}`;
+        } else {
+          resultDiv.style.color = "#ff4c4c";
+          resultDiv.innerHTML = "❌ Ошибка: " + data.message;
+        }
+      } catch (e) {
+        resultDiv.style.color = "#ff4c4c";
+        resultDiv.innerHTML = "📡 Сервер бота недоступен";
+      }
     }
   </script>
 </body>
