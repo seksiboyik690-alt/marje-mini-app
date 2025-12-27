@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarJe Mini App</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background: #121212; color: white; text-align: center; padding: 50px; }
+    button { padding: 15px 30px; font-size: 18px; background: #0088cc; border: none; color: white; border-radius: 10px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Привет, MarJe Mini App!</h1>
+  <p>Ты открыл приложение внутри Telegram!</p>
+  
+  <button onclick="sendData()">Отправить данные боту</button>
+
+  <script>
+    Telegram.WebApp.ready();
+
+    function sendData() {
+      Telegram.WebApp.sendData("Привет от Mini App! User: " + Telegram.WebApp.initDataUnsafe.user.username);
+    }
+
+    // Если бот отправил данные
+    Telegram.WebApp.onEvent('mainButtonClicked', () => {
+      Telegram.WebApp.sendData("Кнопка нажата!");
+    });
+  </script>
+</body>
+</html>
